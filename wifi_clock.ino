@@ -10,7 +10,7 @@ String wifi_password  = "CHANGE TO YOUR WIFI PASSWORD";
 char timeserver[20]   = "il.pool.ntp.org";
 /*******************************/
 
-TimeChangeRule myIDT = {"IDT", Last, Fri, Mar, 2, 180};    // Israel Daylight time = UTC - 3 hours
+TimeChangeRule myIDT = {"IDT", Last, Fri, Mar, 2, 180};    // Israel Daylight time = UTC + 3 hours
 TimeChangeRule myIST = {"IST", Last, Sun, Oct, 2, 120};    // Israel standard time = UTC + 2  hours
 Timezone myTZ(myIDT, myIST);
 
