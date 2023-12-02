@@ -24,15 +24,27 @@ int pinCS = D4;
 int numberOfHorizontalDisplays = 4;
 int numberOfVerticalDisplays   = 1;
 char time_value[20];
-
 Max72xxPanel matrix = Max72xxPanel(pinCS, numberOfHorizontalDisplays, numberOfVerticalDisplays);
 
 void setup() {
-  WiFi.begin(wifi_ssid, wifi_password);
-  
+  setup_matrix();
+  setup_wifi();
+  setup_clock();
+}
+
+void setup_clock(){
   configTime(0 * 3600, 0, timeserver, "time.nist.gov");
-  setTime(myTZ.toUTC(compileTime()));
-  
+}
+
+void setup_wifi(){
+  WiFi.begin(wifi_ssid, wifi_password);
+  while (WiFi.status() != WL_CONNECTED) {
+    display_message(wifi_message());
+    delay(3000);
+  }
+}
+
+void setup_matrix(){
   matrix.setIntensity(10); // Use a value between 0 and 15 for brightness
   matrix.setRotation(0, 1); // The first display is position upside down
   matrix.setRotation(1, 1); // The first display is position upside down
@@ -40,11 +52,6 @@ void setup() {
   matrix.setRotation(3, 1); // The first display is position upside down
   matrix.fillScreen(LOW);
   matrix.write();
-  
-  while (WiFi.status() != WL_CONNECTED) {
-    display_message(wifi_message());
-    delay(3000);
-  } 
 }
 
 String wifi_message() {
@@ -62,7 +69,7 @@ String wifi_message() {
 }
 
 void loop() { 
-  time_t local = myTZ.toLocal(now());
+  time_t local = myTZ.toLocal(time(nullptr));
   display_time(local);
   delay(10000);
 }
@@ -101,26 +108,4 @@ void display_message(String message){
     matrix.write(); // Send bitmap to display
     delay(wait/2);
   }
-}
-
-// Function to return the compile date and time as a time_t value
-time_t compileTime()
-{
-    const time_t FUDGE(10);     // fudge factor to allow for compile time (seconds, YMMV)
-    const char *compDate = __DATE__, *compTime = __TIME__, *months = "JanFebMarAprMayJunJulAugSepOctNovDec";
-    char chMon[4], *m;
-    tmElements_t tm;
-
-    strncpy(chMon, compDate, 3);
-    chMon[3] = '\0';
-    m = strstr(months, chMon);
-    tm.Month = ((m - months) / 3 + 1);
-
-    tm.Day = atoi(compDate + 4);
-    tm.Year = atoi(compDate + 7) - 1970;
-    tm.Hour = atoi(compTime);
-    tm.Minute = atoi(compTime + 3);
-    tm.Second = atoi(compTime + 6);
-    time_t t = makeTime(tm);
-    return t + FUDGE;           // add fudge factor to allow for compile time
 }
